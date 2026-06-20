@@ -1,0 +1,5 @@
+[env]
+# llama-cpp-sys-2 bundles llama.cpp, whose C++ uses std::filesystem (requires
+# macOS 10.15+). Without this, the cmake/clang build defaults to an older
+# deployment target and fails with "'path' is unavailable: introduced in macOS 10.15".
+MACOSX_DEPLOYMENT_TARGET = "11.0"

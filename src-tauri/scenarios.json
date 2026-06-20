@@ -1,0 +1,100 @@
+[
+  {
+    "id": "rooftop-30th",
+    "occasion": "Surprise 30th Birthday",
+    "location": "Downtown Rooftop",
+    "aliases": ["rooftop birthday", "30th birthday", "rooftop party", "surprise birthday", "thirtieth birthday"],
+    "roles": ["the birthday person's sibling", "the bartender", "a college roommate", "the upstairs neighbor", "the photographer", "the caterer", "the secret crush", "the new coworker", "the DJ", "the building doorman"]
+  },
+  {
+    "id": "beach-wedding",
+    "occasion": "Sunset Wedding Reception",
+    "location": "Beach",
+    "aliases": ["beach wedding", "wedding reception", "seaside wedding", "wedding on the beach", "sunset wedding"],
+    "roles": ["the maid of honor", "the groom's brother", "the wedding planner", "the officiant", "a plus-one nobody knows", "the bride's aunt", "the live band singer", "the flower girl's mom", "the open-bar bartender", "the videographer"]
+  },
+  {
+    "id": "halloween-house",
+    "occasion": "Halloween Costume Party",
+    "location": "Old House",
+    "aliases": ["halloween party", "costume party", "halloween costume party", "spooky party"],
+    "roles": ["the host in a vampire costume", "the neighbor who hates noise", "the person who didn't dress up", "the candy bowl guardian", "the haunted-house designer", "the ex who showed up", "the dog in a hot-dog costume's owner", "the fog-machine operator", "the trick-or-treat chaperone", "the apple-bobbing referee"]
+  },
+  {
+    "id": "office-holiday",
+    "occasion": "Company Holiday Party",
+    "location": "Fancy Hotel Ballroom",
+    "aliases": ["office holiday party", "company holiday party", "work christmas party", "holiday party", "office party"],
+    "roles": ["the CEO giving a speech", "the intern who had too much eggnog", "the HR manager watching everyone", "the person from accounting", "the new hire from last week", "the office gift-exchange organizer", "the IT guy nobody recognizes", "the regional manager visiting", "the caterer's assistant", "the band's saxophone player"]
+  },
+  {
+    "id": "kids-bday-park",
+    "occasion": "Kid's 7th Birthday Party",
+    "location": "Park",
+    "aliases": ["kids birthday", "birthday at the park", "7th birthday", "children's party", "kid's party"],
+    "roles": ["the birthday kid's mom", "the hired clown", "a parent on a bench", "the face-painting artist", "the older cousin", "the bounce-house attendant", "the ice-cream truck driver", "the soccer coach who came by", "the grandparent with the camera", "the neighbor's babysitter"]
+  },
+  {
+    "id": "nye-penthouse",
+    "occasion": "New Year's Eve Party",
+    "location": "Penthouse Apartment",
+    "aliases": ["new years eve party", "nye party", "new year party", "penthouse party", "countdown party"],
+    "roles": ["the host counting down", "the champagne pourer", "the person live-streaming it", "the upstairs DJ", "the date someone brought", "the friend from out of town", "the building concierge", "the firework coordinator", "the playlist controller", "the person hogging the balcony"]
+  },
+  {
+    "id": "retirement-bbq",
+    "occasion": "Retirement Barbecue",
+    "location": "Backyard",
+    "aliases": ["retirement party", "backyard bbq", "retirement bbq", "backyard barbecue", "retirement cookout"],
+    "roles": ["the retiree of honor", "the grill master", "a longtime coworker", "the neighbor over the fence", "the boss giving a toast", "the spouse who planned it", "the kid running through sprinklers", "the potato-salad contributor", "the horseshoe champion", "the dog begging for burgers"]
+  },
+  {
+    "id": "graduation-party",
+    "occasion": "High-School Graduation Party",
+    "location": "Backyard",
+    "aliases": ["graduation party", "grad party", "high school graduation", "graduation celebration"],
+    "roles": ["the graduate", "the proud parent", "a favorite teacher", "the younger sibling", "the best friend since kindergarten", "the relative who flew in", "the neighbor who watched them grow up", "the photographer parent", "the cake cutter", "the cousin filming TikToks"]
+  },
+  {
+    "id": "baby-shower",
+    "occasion": "Baby Shower",
+    "location": "Sunny Living Room",
+    "aliases": ["baby shower", "shower party", "baby celebration"],
+    "roles": ["the parent-to-be", "the host best friend", "the grandmother-to-be", "the games organizer", "the coworker who barely knows them", "the partner making a cameo", "the gift wrapper", "the pediatrician friend", "the aunt knitting booties", "the neighbor with the casserole"]
+  },
+  {
+    "id": "frat-house",
+    "occasion": "Friday-Night House Party",
+    "location": "College House",
+    "aliases": ["college party", "house party", "frat party", "dorm party", "friday night party"],
+    "roles": ["the host whose lease it is", "the DJ on a laptop", "the beer-pong champion", "the RA pretending not to notice", "someone from the wrong party", "the friend who knows everyone", "the person guarding the snacks", "the neighbor who complained", "the freshman who got lost", "the playlist hijacker"]
+  },
+  {
+    "id": "gender-reveal",
+    "occasion": "Gender Reveal Party",
+    "location": "Decorated Garden",
+    "aliases": ["gender reveal", "gender reveal party", "reveal party", "garden reveal"],
+    "roles": ["the expecting parent", "the balloon handler", "the cousin with the confetti cannon", "the grandparent placing bets", "the friend who already knows", "the caterer", "the drone photographer", "the sibling sulking for attention", "the neighbor peeking over", "the cake baker who kept the secret"]
+  },
+  {
+    "id": "anniversary-dinner",
+    "occasion": "25th Wedding Anniversary Dinner",
+    "location": "Restaurant",
+    "aliases": ["anniversary dinner", "wedding anniversary", "25th anniversary", "silver anniversary", "anniversary party"],
+    "roles": ["one of the celebrating couple", "the adult son who organized it", "the maître d'", "the couple's oldest friend", "the violinist hired for the night", "the daughter-in-law", "the wine sommelier", "the grandchild in a tiny suit", "the neighbor invited last minute", "the pastry chef"]
+  },
+  {
+    "id": "housewarming",
+    "occasion": "Housewarming Party",
+    "location": "Brand-New Apartment",
+    "aliases": ["housewarming", "housewarming party", "new apartment party", "moving-in party"],
+    "roles": ["the new homeowner", "the friend giving a tour", "the neighbor introducing themselves", "the person who helped them move", "the plant-gift bearer", "the realtor who dropped by", "the coworker seeing the place", "the cousin raiding the fridge", "the friend testing the new couch", "the building manager"]
+  },
+  {
+    "id": "masquerade-ball",
+    "occasion": "Masquerade Ball",
+    "location": "Grand Hall",
+    "aliases": ["masquerade ball", "masquerade party", "masked ball", "fancy ball", "masked party"],
+    "roles": ["the mysterious host", "the string-quartet leader", "the guest in the gold mask", "the dance instructor", "the mask-check attendant", "the socialite everyone whispers about", "the waiter with champagne", "the gatecrasher in a borrowed mask", "the photographer for the society page", "the coat-check clerk"]
+  }
+]

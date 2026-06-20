@@ -1,0 +1,43 @@
+[package]
+name = "uninvited"
+version = "0.1.0"
+description = "Uninvited — a local-LLM party deduction game"
+authors = ["you"]
+edition = "2021"
+
+[lib]
+name = "uninvited"
+path = "src/lib.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+llama-cpp-2 = { version = "0.1.150", features = ["metal"] }
+encoding_rs = "0.8"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+dirs = "5"
+libc = "0.2"
+minijinja = "2"
+rand = "0.8"
+
+[profile.release]
+opt-level = 3
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+# Opt-in only: gates the KV-cache benchmark example so CI / `cargo test` /
+# `cargo build` never compile or run it. Run it deliberately with
+# `--features bench-sim` (see examples/bench_kv.rs).
+bench-sim = []
+
+# The KV-cache strategy benchmark. `required-features` keeps it out of every
+# default build target; it is only built when `bench-sim` is enabled.
+[[example]]
+name = "bench_kv"
+required-features = ["bench-sim"]

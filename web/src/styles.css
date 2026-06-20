@@ -1,0 +1,215 @@
+:root {
+  --bg: #160a26;        /* party night base */
+  --bg-panel: #1e1033;  /* lifted panel */
+  --bg-elev: #2a1745;   /* interactive controls */
+  --line: #3c1d5e;      /* border */
+  --ink: #e8def5;
+  --ink-dim: #b6a3d8;
+  --ink-faint: #7d6aa3;
+  --gold: #f5b53d;      /* the host / highlight */
+  --player: #8a9bf0;    /* cool blue */
+  --invited: #56d6a0;   /* green */
+  --outsider: #e2576b;  /* red */
+  --accent: #e2576b;
+  --font: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  background: radial-gradient(1200px 700px at 50% -10%, #2a1248 0%, var(--bg) 60%);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 18px 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.brand { font-weight: 700; letter-spacing: 2px; color: var(--gold); }
+.brand small { color: var(--ink-faint); letter-spacing: 1px; font-weight: 400; }
+
+.muted { color: var(--ink-dim); }
+.hint { color: var(--ink-faint); font-size: 12px; margin: 6px 0 0; }
+.dim { color: var(--ink-faint); }
+
+/* ---- panels / setup screens ---- */
+.setup { max-width: 560px; margin: 6vh auto 0; width: 100%; }
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 26px;
+}
+.panel h2 { margin: 0 0 12px; color: var(--ink); font-weight: 600; }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  color: var(--ink);
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 14px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+button:hover:not(:disabled) { border-color: var(--player); }
+button:disabled { opacity: 0.45; cursor: default; }
+
+.primary {
+  background: linear-gradient(180deg, #6a3bb0, #4a2780);
+  border-color: #6a3bb0;
+  color: #fff;
+  font-weight: 600;
+}
+.primary:hover:not(:disabled) { border-color: var(--gold); }
+.primary.big { width: 100%; padding: 12px; margin-top: 8px; font-size: 15px; }
+.ghost { background: transparent; }
+.ghost.guess { border-color: var(--outsider); color: var(--outsider); }
+
+.field { margin: 18px 0; }
+.field > label { display: block; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }
+.seg { display: flex; gap: 8px; }
+.seg button { flex: 1; }
+.seg .seg-on { background: var(--bg-elev); border-color: var(--gold); color: var(--gold); }
+input[type="range"] { width: 100%; accent-color: var(--gold); }
+
+/* ---- startup gate ---- */
+.startup { text-align: center; }
+.startup .dossier { font-size: 11px; letter-spacing: 3px; color: var(--gold); margin-bottom: 16px; }
+.startup-note { color: var(--ink-faint); font-size: 12px; margin: 12px 0 0; }
+.bar { height: 12px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, #b06fe0, var(--gold)); transition: width 0.4s ease; }
+.bar-meta { display: flex; justify-content: space-between; color: var(--ink-dim); font-size: 12px; margin-top: 8px; }
+.spinner-row { display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--ink-dim); }
+.spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--gold); animation: spin 0.8s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error { color: var(--accent); font-size: 12.5px; white-space: pre-wrap; }
+
+/* ---- game ---- */
+.game { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 12px 0 14px; gap: 12px; }
+.game-main { flex: 1; min-height: 0; display: flex; gap: 14px; }
+.sidebar { width: 300px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+
+.rolecard { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.role-tag { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+.role-tag.invited { color: var(--invited); }
+.role-tag.outsider { color: var(--outsider); }
+.role-line { margin: 4px 0; }
+.role-line.dim { color: var(--ink-dim); }
+
+.locboard { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; max-height: 184px; display: flex; flex-direction: column; overflow: hidden; }
+.locboard-title { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+.locboard-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; display: flex; flex-direction: column; }
+.locboard-list li { font-size: 13px; color: var(--ink-dim); padding: 3px 8px; border-radius: 4px; }
+.locboard-list li:nth-child(even) { background: rgba(255, 255, 255, 0.035); }
+.locboard-list li { display: flex; flex-direction: column; line-height: 1.3; }
+.locboard-list li.is-active { color: var(--gold); }
+.locboard-list li.is-active .party-loc,
+.locboard-list li.is-active .party-occ { color: var(--gold); }
+
+/* A party reads venue-first: the location is the headline (bolder), the
+   occasion sits beneath it, dimmer and smaller. Used on the board, the guess
+   picker, and the role/result lines. */
+.party-occ { color: var(--ink); font-weight: 600; }
+.party-loc { color: var(--ink-faint); font-size: 11px; }
+
+.guests { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.guests-title { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+.guests-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.guests-list li { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; color: var(--ink-dim); padding: 3px 8px; border-radius: 4px; }
+.guests-list li:nth-child(even) { background: rgba(255, 255, 255, 0.035); }
+.guests-list li.is-you .guest-name { color: var(--player); }
+.guests-list li.is-invited .guest-name { color: var(--invited); }
+.guests-list li.is-uninvited .guest-name { color: var(--outsider); }
+.guests-list li.is-active { background: var(--bg-elev); box-shadow: inset 2px 0 0 var(--gold); }
+.guests-list li.is-active .guest-name { color: var(--gold); }
+.guest-flag { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); }
+.guest-side { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-faint); }
+.guest-vote { font-size: 11px; color: var(--ink-dim); margin-left: auto; }
+
+.tlog { flex: 1; min-width: 0; min-height: 0; background: var(--bg-panel); border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; }
+.tlog-title { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-faint); padding: 10px 14px 6px; display: flex; justify-content: space-between; align-items: center; }
+.tlog-phase { color: var(--gold); }
+.tlog-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 14px 12px; display: flex; flex-direction: column; gap: 12px; }
+
+/* Each exchange is its own card: a left stripe in the asker's identity color,
+   then the asker -> target header, the question, and the answer behind a
+   hairline. Per-guest color (the chips) replaces the old all-gold names so the
+   conversation is scannable at a glance. */
+.tlog-entry { background: var(--bg-elev); border: 1px solid var(--line); border-left: 3px solid var(--asker, var(--line)); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.xc-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.xc-arrow { color: var(--ink-faint); }
+.xc-q { color: var(--ink); }
+.xc-div { height: 1px; background: var(--line); margin: 1px 0; }
+.xc-a { color: var(--ink-dim); display: flex; gap: 8px; align-items: baseline; }
+.xc-reply { flex: none; font-weight: 700; }
+
+/* Identity chip: a colored avatar + name, both tinted via the --c set inline. */
+.chip { display: inline-flex; align-items: center; gap: 6px; }
+.chip-av { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--bg); background: var(--c, var(--ink-faint)); }
+.chip-name { font-weight: 600; color: var(--c, var(--ink)); }
+
+/* In-flight exchange: the question is on screen while its answer is composed. */
+.tlog-entry.pending { opacity: 0.92; }
+.typing { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-faint); }
+.typing-label { font-style: italic; }
+.typing-dots { display: inline-flex; gap: 3px; }
+.typing-dots i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; animation: blink 1.2s infinite both; }
+.typing-dots i:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
+
+.thoughts { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+.thoughts-toggle { background: transparent; border: none; color: var(--ink-faint); padding: 2px 0; }
+.thoughts-body { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto; }
+.thought { font-size: 12px; font-style: italic; color: var(--ink-faint); white-space: pre-wrap; }
+.thought .who { color: var(--player); font-style: normal; }
+
+/* ---- input bar ---- */
+.inputbar { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.inputbar.waiting { display: flex; align-items: center; gap: 10px; color: var(--ink-dim); justify-content: center; }
+.bar-label { color: var(--ink-dim); margin-bottom: 8px; font-size: 13px; }
+.bar-label strong { color: var(--ink); }
+.bar-row { display: flex; gap: 8px; align-items: center; }
+.text { flex: 1; font: inherit; color: var(--ink); background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; }
+.text:focus { outline: none; border-color: var(--gold); }
+.targetpick { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.pill { padding: 5px 12px; border-radius: 999px; font-size: 13px; }
+.pill-on { border-color: var(--gold); color: var(--gold); background: var(--bg-elev); }
+.loclist { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; max-height: 240px; overflow-y: auto; }
+.locopt { text-align: left; padding: 8px 12px; border-radius: 8px; font-size: 13px; display: flex; flex-direction: column; gap: 1px; }
+.locopt-on { border-color: var(--gold); color: var(--gold); background: var(--bg-elev); }
+.locopt-on .party-loc, .locopt-on .party-occ { color: var(--gold); }
+
+/* ---- result ---- */
+.result { text-align: center; }
+.verdict { font-size: 28px; font-weight: 800; letter-spacing: 1px; margin-bottom: 14px; }
+.verdict.win { color: var(--invited); }
+.verdict.lose { color: var(--outsider); }
+.result-line { margin: 6px 0; }
+.votes-recap { margin: 18px auto 4px; border-top: 1px solid var(--line); padding-top: 14px; }
+.votes-recap-title { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 12px; }
+.votes-recap-grid { display: inline-grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 7px 12px; font-size: 14px; }
+.votes-recap-grid .vr-name { color: var(--ink-dim); }
+.votes-recap-grid .vr-voter { text-align: right; }
+.votes-recap-grid .vr-target { text-align: left; }
+.votes-recap-grid .vr-arrow { color: var(--ink-faint); font-size: 12px; }
+.votes-recap-grid .is-you { color: var(--player); font-weight: 600; }
+.votes-recap-grid .is-uninvited { color: var(--outsider); font-weight: 600; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }

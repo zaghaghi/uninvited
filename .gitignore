@@ -1,0 +1,14 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+web/dist/
+src-tauri/target/
+src-tauri/gen/
+
+# os
+.DS_Store
+
+# typescript incremental build cache
+*.tsbuildinfo
