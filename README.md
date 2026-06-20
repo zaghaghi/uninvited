@@ -7,6 +7,8 @@ Everyone at the party is **invited** and knows what the party is… except one
 questions to expose the outsider; the outsider blends in and tries to deduce the
 party (and can win instantly by guessing it).
 
+![Uninvited in-game — the conversation view, with your role card, the guest list, and the board of possible parties in the sidebar](screenshots/in-game.png)
+
 You choose, before each game:
 1. whether you play as an **invited guest** or **the outsider**, and
 2. how many **AI players** join (2–8).

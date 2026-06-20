@@ -12,3 +12,4 @@ src-tauri/gen/
 
 # typescript incremental build cache
 *.tsbuildinfo
+icon.af~lock~
