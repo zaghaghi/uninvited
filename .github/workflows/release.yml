@@ -1,0 +1,262 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: uninvited-macos
+            bundles: app,dmg
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: uninvited-windows
+            bundles: msi
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: uninvited-linux
+            bundles: appimage,deb
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set macOS deployment target
+        if: runner.os == 'macOS'
+        # Pin the macOS deployment target to 11.0:
+        #   - MACOSX_DEPLOYMENT_TARGET -> rustc and the linker.
+        #   - CMAKE_OSX_DEPLOYMENT_TARGET -> the CMake build of llama.cpp/ggml.
+        #     llama-cpp-sys forwards CMAKE_* env vars as -D defines; without this,
+        #     ggml compiles below 10.15 and fails (std::filesystem unavailable).
+        # We deliberately don't pass -mmacosx-version-min via RUSTFLAGS (rustc
+        # rejects that clang-only flag).
+        run: |
+          echo "MACOSX_DEPLOYMENT_TARGET=11.0" >> $GITHUB_ENV
+          echo "CMAKE_OSX_DEPLOYMENT_TARGET=11.0" >> $GITHUB_ENV
+
+      - name: Import macOS signing certificate
+        if: runner.os == 'macOS'
+        # Decodes the base64 .p12 secret into a temp keychain so `tauri build`
+        # can sign with codesign and notarize via notarytool. Cleans up after.
+        env:
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN=build.keychain-db
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
+          CERT_PATH="${RUNNER_TEMP}/cert.p12"
+
+          echo "$MACOS_CERT_P12_BASE64" | base64 --decode > "$CERT_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+
+          security import "$CERT_PATH" \
+            -k "$KEYCHAIN" \
+            -P "$MACOS_CERT_PASSWORD" \
+            -T /usr/bin/codesign \
+            -T /usr/bin/security \
+            -T /usr/bin/xcrun
+
+          security list-keychain -d user -s "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+
+          echo "KEYCHAIN_PATH=$KEYCHAIN" >> $GITHUB_ENV
+          echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $GITHUB_ENV
+          # Make the cert available to the next steps.
+          echo "MACOS_CERT_PATH=$CERT_PATH" >> $GITHUB_ENV
+
+      - name: Write App Store Connect API key
+        if: runner.os == 'macOS'
+        env:
+          APPLE_AUTH_KEY_P8_BASE64: ${{ secrets.APPLE_AUTH_KEY_P8_BASE64 }}
+          APPLE_AUTH_KEY_ID: ${{ secrets.APPLE_AUTH_KEY_ID }}
+          APPLE_AUTH_KEY_ISSUER_ID: ${{ secrets.APPLE_AUTH_KEY_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "$APPLE_AUTH_KEY_P8_BASE64" ] || [ -z "$APPLE_AUTH_KEY_ID" ] || [ -z "$APPLE_AUTH_KEY_ISSUER_ID" ]; then
+            echo "::error::APPLE_AUTH_KEY_P8_BASE64, APPLE_AUTH_KEY_ID, and APPLE_AUTH_KEY_ISSUER_ID must all be set for notarization."
+            exit 1
+          fi
+          KEY_DIR="${RUNNER_TEMP}/apple-auth-key"
+          mkdir -p "$KEY_DIR"
+          KEY_PATH="$KEY_DIR/AuthKey_${APPLE_AUTH_KEY_ID}.p8"
+          echo "$APPLE_AUTH_KEY_P8_BASE64" | base64 --decode > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          # Export under the names Tauri 2 actually reads for notarization.
+          echo "APPLE_API_KEY_PATH=$KEY_PATH" >> $GITHUB_ENV
+          echo "APPLE_API_KEY=$APPLE_AUTH_KEY_ID" >> $GITHUB_ENV
+          echo "APPLE_API_ISSUER=$APPLE_AUTH_KEY_ISSUER_ID" >> $GITHUB_ENV
+
+      - name: Install Linux build deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev \
+            libwebkit2gtk-4.1-dev \
+            file \
+            wget \
+            dpkg-dev \
+            fakeroot \
+            binutils
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Install npm dependencies (root)
+        run: npm ci
+
+      - name: Install npm dependencies (web)
+        working-directory: web
+        run: npm ci
+
+      - name: Set bundle version from release tag
+        if: github.event_name == 'release'
+        # Tauri reads the bundle version from tauri.conf.json's `version`, which
+        # is otherwise pinned to whatever was committed. Rewrite it from the
+        # release tag (v1.2.0 -> 1.2.0) so every release builds installers
+        # labeled with its tag. shell: bash runs identically on the Windows leg
+        # (Git Bash); Node is used for the edit so JSON quoting is OS-agnostic.
+        shell: bash
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.+-].+)?$ ]]; then
+            echo "::error::Tag '$TAG' -> '$VERSION' is not valid semver (expected vX.Y.Z)."
+            exit 1
+          fi
+          export VERSION
+          node -e "const fs=require('fs');const p='src-tauri/tauri.conf.json';const c=JSON.parse(fs.readFileSync(p,'utf8'));c.version=process.env.VERSION;fs.writeFileSync(p,JSON.stringify(c,null,2)+'\n');console.log('tauri.conf.json version -> '+c.version);"
+
+      - name: Build (Tauri)
+        env:
+          # macOS signing & notarization. Tauri 2 reads these exact names:
+          #   APPLE_SIGNING_IDENTITY -> codesign --identity
+          #   APPLE_API_KEY          -> App Store Connect API key ID
+          #   APPLE_API_ISSUER       -> issuer ID
+          #   APPLE_API_KEY_PATH     -> path to the .p8 (notarytool submit)
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_KEY_PATH: ${{ env.APPLE_API_KEY_PATH }}
+          APPLE_API_KEY: ${{ env.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ env.APPLE_API_ISSUER }}
+        run: npx tauri build --bundles ${{ matrix.bundles }}
+
+      - name: Notarize & staple dmg
+        if: runner.os == 'macOS' && contains(matrix.bundles, 'dmg')
+        # Tauri notarizes/staples the .app but only *signs* the .dmg container,
+        # so the dmg download itself fails Gatekeeper. Notarize + staple it here.
+        env:
+          APPLE_API_KEY_PATH: ${{ env.APPLE_API_KEY_PATH }}
+          APPLE_API_KEY: ${{ env.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ env.APPLE_API_ISSUER }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          dmgs=(src-tauri/target/release/bundle/dmg/*.dmg)
+          if [ ${#dmgs[@]} -eq 0 ]; then
+            echo "::error::No dmg found to notarize."
+            exit 1
+          fi
+          for dmg in "${dmgs[@]}"; do
+            echo "Notarizing $dmg"
+            xcrun notarytool submit "$dmg" \
+              --key "$APPLE_API_KEY_PATH" \
+              --key-id "$APPLE_API_KEY" \
+              --issuer "$APPLE_API_ISSUER" \
+              --wait
+            xcrun stapler staple "$dmg"
+            xcrun stapler validate "$dmg"
+          done
+
+      - name: Clean up macOS keychain
+        if: always() && runner.os == 'macOS'
+        env:
+          KEYCHAIN_PATH: ${{ env.KEYCHAIN_PATH }}
+          KEYCHAIN_PASSWORD: ${{ env.KEYCHAIN_PASSWORD }}
+        run: |
+          if [ -n "${KEYCHAIN_PATH:-}" ]; then
+            security delete-keychain "$KEYCHAIN_PATH" || true
+          fi
+          security list-keychain -d user -s login.keychain-db
+          rm -f "${MACOS_CERT_PATH:-}" || true
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          # Only the distributable installers — NOT the unpacked bundle trees
+          # (the macOS .app, the AppImage AppDir, the deb's data tree), whose
+          # files would otherwise be uploaded individually to the release.
+          path: |
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/appimage/*.AppImage
+            src-tauri/target/release/bundle/deb/*.deb
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Upload installers to release
+    needs: build
+    runs-on: ubuntu-latest
+    # Run even if some build matrix legs failed (fail-fast is false), so the
+    # installers produced by the successful OS jobs still get published. The
+    # download-artifact step only fetches artifacts that were actually uploaded
+    # (failed legs upload nothing). Skipped only if the run was cancelled.
+    if: ${{ !cancelled() && github.event_name == 'release' }}
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Upload installers to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/**/*.dmg
+            artifacts/**/*.msi
+            artifacts/**/*.AppImage
+            artifacts/**/*.deb
+          fail_on_unmatched_files: false
+          generate_release_notes: false
